@@ -32,7 +32,6 @@
     <None Include="res\TagSensePlugin.rc2">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="ReadMe.txt" />
     <None Include="packages.config" />
     <None Include="$(MSBuildThisFileDirectory)\libcurl.dll" />
     <None Include="$(MSBuildThisFileDirectory)\LibCurlShim.dll" />

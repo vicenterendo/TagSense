@@ -373,7 +373,6 @@
     <None Include="TagSensePlugin.def" />
     <None Include="packages.config" />
     <None Include="res\TagSensePlugin.rc2" />
-    <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TagSensePlugin.h" />
