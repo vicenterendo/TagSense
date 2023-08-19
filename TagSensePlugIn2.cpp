@@ -5,13 +5,13 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cctype>
 
 #define MY_PLUGIN_NAME      "TagSense"
 #define MY_PLUGIN_VERSION   "0.0.1-a"
 #define MY_PLUGIN_DEVELOPER "Vicente Rendo"
 #define MY_PLUGIN_COPYRIGHT "GPL v3"
-
-string SERVER_ADDR = "127.0.0.1";
+#define CONFIG_FILE "TagSenseConfig.txt"
 
 using namespace std;
 using namespace EuroScopePlugIn;
@@ -28,10 +28,22 @@ const   int     TAG_FUNC_HOLDING_WAIT_LIST = 11;  // for the popup list elements
 const   int     TAG_FUNC_HOLDING_WAIT_CLEAR = 12;  // cnacel the wait by the popup
 
 bool STATE = true;
+string SERVER_ADDR = "127.0.0.1";
+string ORIGIN_PREFIX = "LP";
 
 static bool startsWith(const char* pre, const char* str) {
-    size_t lenpre = strlen(pre), lenstr = strlen(str);
+    const size_t lenpre = strlen(pre), lenstr = strlen(str);
     return lenstr < lenpre ? false : strncmp(pre, str, lenpre) == 0;
+}
+
+static std::string toUpper(const std::string& input) {
+    std::string upperCase;
+
+    for (char c : input) {
+        upperCase += std::toupper(c);
+    }
+
+    return upperCase;
 }
 
 static std::vector<std::string> splitString(const std::string& input, char delimiter) {
@@ -46,6 +58,41 @@ static std::vector<std::string> splitString(const std::string& input, char delim
     return result;
 }
 
+static bool loadConfig(const string filePath = CONFIG_FILE) {
+    std::ifstream inputFile(CONFIG_FILE);
+    if (!inputFile) {
+        std::ofstream outputFile(CONFIG_FILE);
+        if (outputFile) {
+            outputFile << format("SERVER {} // ADDRESS OF THE REMOTE TAGSENSE SERVER\nPREFIX {} // ORIGIN ICAO CODE FILTER (LP = LPxx, E = Exxx, ...)", SERVER_ADDR, ORIGIN_PREFIX) << std::endl;
+            outputFile.close();
+        }
+    }
+    try {
+        fstream configFile;
+        configFile.open(CONFIG_FILE, ios::in);
+        if (configFile.is_open()) {
+            string tp;
+            while (getline(configFile, tp)) {
+                const vector<string> split = splitString(tp, ' ');
+                if (split.size() < 2) continue;
+                const string param = toUpper(split.at(0));
+                const string value = split.at(1);
+                if (param == "SERVER") {
+                    SERVER_ADDR = value;
+                }
+                else if (param == "PREFIX") {
+                    ORIGIN_PREFIX = value;
+                }
+            }
+            configFile.close();
+        }
+        return true;
+    }
+    catch (const std::exception e) {
+        return false;
+    }
+}
+
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
     const size_t total_size = size * nmemb;
     std::string* response = static_cast<std::string*>(userp);
@@ -54,12 +101,18 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
 }
 
 CTagSensePlugIn::CTagSensePlugIn()
-    : EuroScopePlugIn::CPlugIn(EuroScopePlugIn::COMPATIBILITY_CODE,
+  : EuroScopePlugIn::CPlugIn(EuroScopePlugIn::COMPATIBILITY_CODE,
         MY_PLUGIN_NAME,
         MY_PLUGIN_VERSION,
         MY_PLUGIN_DEVELOPER,
         MY_PLUGIN_COPYRIGHT)
 {
+    if (loadConfig()) {
+        sendMessage("Config file loaded.");
+    }
+    else {
+        sendMessage("Failed to load config file.");
+    }
 }
 
 void CTagSensePlugIn::sendMessage(string message) {
@@ -88,7 +141,7 @@ void CTagSensePlugIn::IterateFPs()
     std::vector<CFlightPlan> FPs;
     while (true) {
         if (!fp.IsValid()) break;
-        if (string(fp.GetFlightPlanData().GetOrigin()).substr(0, 2) == "LP") FPs.push_back(fp);
+        if (string(fp.GetFlightPlanData().GetOrigin()).substr(0, ORIGIN_PREFIX.length()) == ORIGIN_PREFIX) FPs.push_back(fp);
         fp = FlightPlanSelectNext(fp);
         if (fp.GetCallsign() == firstCallsign) break;
     }
