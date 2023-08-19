@@ -10,8 +10,8 @@
 #define MY_PLUGIN_VERSION   "0.0.1-a"
 #define MY_PLUGIN_DEVELOPER "Vicente Rendo"
 #define MY_PLUGIN_COPYRIGHT "GPL v3"
-#define SERVER_HOSTNAME "127.0.0.1"
-#define SERVER_PORT ""
+
+string SERVER_ADDR = "127.0.0.1";
 
 using namespace std;
 using namespace EuroScopePlugIn;
@@ -32,6 +32,18 @@ bool STATE = true;
 static bool startsWith(const char* pre, const char* str) {
     size_t lenpre = strlen(pre), lenstr = strlen(str);
     return lenstr < lenpre ? false : strncmp(pre, str, lenpre) == 0;
+}
+
+static std::vector<std::string> splitString(const std::string& input, char delimiter) {
+    std::vector<std::string> result;
+    std::string token;
+    std::istringstream iss(input);
+
+    while (std::getline(iss, token, delimiter)) {
+        result.push_back(token);
+    }
+
+    return result;
 }
 
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
@@ -139,7 +151,7 @@ void CTagSensePlugIn::SendFPs(vector<CFlightPlan> fps_total) {
             try {
                 struct curl_slist* headers = nullptr;
                 headers = curl_slist_append(headers, "Content-Type: application/json");
-                curl_easy_setopt(curl, CURLOPT_URL, std::format("http://{}{}/tag", SERVER_HOSTNAME, SERVER_PORT).c_str());
+                curl_easy_setopt(curl, CURLOPT_URL, std::format("http://{}/tag", SERVER_ADDR).c_str());
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback, json);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
                 curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
@@ -162,12 +174,17 @@ void CTagSensePlugIn::SendFPs(vector<CFlightPlan> fps_total) {
 bool CTagSensePlugIn::OnCompileCommand(const char* sCommandLine) {
     if (startsWith(".tagsense stop", sCommandLine)) {
         STATE = false;
-        sendMessage("Updates: OFF");
+        sendMessage("UPDATES - OFF");
         return true;
     }
     else if (startsWith(".tagsense start", sCommandLine)) {
         STATE = true;
-        sendMessage("Updates: ON");
+        sendMessage("UPDATES - ON");
+        return true;
+    }
+    else if (startsWith(".tagsense server", sCommandLine) && splitString(string(sCommandLine), ' ').size() == 3) {
+        SERVER_ADDR = splitString(string(sCommandLine), ' ').at(2);
+        sendMessage(format("SERVER ADDRESS - {}", SERVER_ADDR));
         return true;
     }
 }
