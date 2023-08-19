@@ -51,15 +51,6 @@ public:
 
     void OnTimer(int Counter);
 
-    void OnGetTagItem (CFlightPlan FlightPlan,
-        CRadarTarget RadarTarget,
-        int ItemCode,
-        int TagData,
-        char sItemString[16],
-        int* pColorCode,
-        COLORREF* pRGB,
-        double* pFontSize);
-
     //void OnFunctionCall(int FunctionId, const char* ItemString, POINT Pt, RECT Area);
     void multithread(void (CTagSensePlugIn::* f)());
 
@@ -102,9 +93,7 @@ public:
 
     void SendFPs(vector<CFlightPlan> fps_total);
 
-    void OnFlightPlanFlightPlanDataUpdate(CFlightPlan FlightPlan);
-
-    void OnRefresh(HDC hDC, int Phase);
+    bool OnCompileCommand(const char* sCommandLine);
 };
 
 

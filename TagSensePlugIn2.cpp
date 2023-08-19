@@ -27,6 +27,12 @@ const   int     TAG_FUNC_HOLDING_EDITOR = 10;  // when editing the point name
 const   int     TAG_FUNC_HOLDING_WAIT_LIST = 11;  // for the popup list elements
 const   int     TAG_FUNC_HOLDING_WAIT_CLEAR = 12;  // cnacel the wait by the popup
 
+bool STATE = true;
+
+static bool startsWith(const char* pre, const char* str) {
+    size_t lenpre = strlen(pre), lenstr = strlen(str);
+    return lenstr < lenpre ? false : strncmp(pre, str, lenpre) == 0;
+}
 
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
     const size_t total_size = size * nmemb;
@@ -34,8 +40,6 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
     response->append(static_cast<char*>(contents), total_size);
     return total_size;
 }
-
-//---CHoldingListPlugIn------------------------------------------------
 
 CTagSensePlugIn::CTagSensePlugIn()
     : EuroScopePlugIn::CPlugIn(EuroScopePlugIn::COMPATIBILITY_CODE,
@@ -51,37 +55,7 @@ void CTagSensePlugIn::sendMessage(string message) {
 };
 
 void CTagSensePlugIn::OnTimer(int Counter) {
-    if (Counter % 10 == 0) multithread(&CTagSensePlugIn::IterateFPs);
-}
-
-void CTagSensePlugIn::OnGetTagItem(
-    CFlightPlan FlightPlan,
-    CRadarTarget RadarTarget,
-    int ItemCode,
-    int TagData,
-    char sItemString[16],
-    int* pColorCode,
-    COLORREF* pRGB,
-    double* pFontSize)
-{
-    //CPlugIn::DisplayUserMessage(PLUGIN_NAME, "", "TRIGGER", true, true, true, false, false);
-    //sendFP(FlightPlan);
-}
-
-void CTagSensePlugIn::OnFlightPlanFlightPlanDataUpdate(CFlightPlan FlightPlan) {
-    //sendFP(FlightPlan);
-}
-
-//---~CHoldingListPlugIn-----------------------------------------------
-
-void CTagSensePlugIn::OnRefresh(HDC hDC, int Phase) {
-    const CFlightPlan fp = FlightPlanSelectASEL();
-    if (fp.IsValid()) {
-        CPlugIn::DisplayUserMessage(PLUGIN_NAME, "", "VALID2", true, true, true, false, false);
-        SendFP(fp);
-        return;
-    }
-    CPlugIn::DisplayUserMessage(PLUGIN_NAME, "", "INVALID2", true, true, true, false, false);
+    if (Counter % 10 == 0 && STATE) multithread(&CTagSensePlugIn::IterateFPs);
 }
 
 void CTagSensePlugIn::multithread(void (CTagSensePlugIn::* f)()) {
@@ -184,6 +158,13 @@ void CTagSensePlugIn::SendFPs(vector<CFlightPlan> fps_total) {
 
     }
 }
+
+bool CTagSensePlugIn::OnCompileCommand(const char* sCommandLine) {
+    if (startsWith(".tagsense pause")) {
+
+    }
+}
+
 
 CTagSensePlugIn :: ~CTagSensePlugIn(void)
 {
