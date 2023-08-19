@@ -1,4 +1,4 @@
-# TagSense 
+# TagSense  Plugin
 
 TagSense is a service that allows for external processing of aircraft tags in the `VATSIM` network. This `Euroscope plugin` interfaces with the [TagSense Server](https://github.com/vicenterendo/TagSense-Server) at the location specified by each vACC.
 
