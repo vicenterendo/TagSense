@@ -160,8 +160,15 @@ void CTagSensePlugIn::SendFPs(vector<CFlightPlan> fps_total) {
 }
 
 bool CTagSensePlugIn::OnCompileCommand(const char* sCommandLine) {
-    if (startsWith(".tagsense pause")) {
-
+    if (startsWith(".tagsense stop", sCommandLine)) {
+        STATE = false;
+        sendMessage("Updates: OFF");
+        return true;
+    }
+    else if (startsWith(".tagsense start", sCommandLine)) {
+        STATE = true;
+        sendMessage("Updates: ON");
+        return true;
     }
 }
 
