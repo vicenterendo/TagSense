@@ -44,7 +44,6 @@ CTagSensePlugIn::CTagSensePlugIn()
         MY_PLUGIN_DEVELOPER,
         MY_PLUGIN_COPYRIGHT)
 {
-    sendMessage("P0");
 }
 
 void CTagSensePlugIn::sendMessage(string message) {
