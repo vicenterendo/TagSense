@@ -1,0 +1,75 @@
+commit a5983bb90daad5f85b3645a883faeef18c0232f5 (HEAD, tag: v0.14.0, origin/main, origin/HEAD, main)
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-07-31
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-07-31
+
+    Bump package version and library version
+
+commit 8fb3c0c12ce299d1eae20e7cfbcd466f4a12cc61
+Merge: 2d1d622 5a55f34
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2023-07-16
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2023-07-16
+
+    Merge pull request #153 from ngtcp2/nghttp3_stream_writev-never-fail
+    
+    nghttp3_stream_writev never fail
+
+commit 5a55f34bc533715c37af683a867cd2c88c82bc08
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-07-16
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-07-16
+
+    nghttp3_stream_writev never fail
+
+commit 2d1d6224dfcf40c30365f740fc94ff358a82f6cc
+Merge: dace540 12cb15a
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2023-07-16
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2023-07-16
+
+    Merge pull request #152 from ngtcp2/no-inline-nghttp3_objalloc_get
+    
+    Do not inline nghttp3_objalloc_*_get
+
+commit 12cb15a661c368cdaebaa628ad5f9e18ca13bf30
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-07-16
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-07-16
+
+    Do not inline nghttp3_objalloc_*_get
+    
+    Do not inline nghttp3_objalloc_*_get because it fails on some
+    platforms.
+
+commit dace5400a078dbdf0cc5351350d2fd1d56852cbc
+Merge: ac9e9ce 7a0199c
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2023-07-11
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2023-07-11
+
+    Merge pull request #151 from ngtcp2/bump-macos
+    
+    Bump macos to 12
+
+commit 7a0199c03b38062969441ce8816667afd73d4c79
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-07-11
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-07-11
+
+    Bump macos to 12
+
+commit ac9e9ce13baa641c700bdaf807da1e5111834433
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2023-07-09
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2023-07-09
+
+    Bump package version
