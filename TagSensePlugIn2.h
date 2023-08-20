@@ -97,30 +97,3 @@ public:
 
     void loadConfig();
 };
-
-
-/*void ACDMPlugin::OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan,
-    EuroScopePlugIn::CRadarTarget RadarTarget,
-    int ItemCode,
-    int TagData,
-    char sItemString[16],
-    int* pColorCode,
-    COLORREF* pRGB,
-    double* pFontSize)
-{
-
-    if (!FlightPlan.IsValid()) {
-        return;
-    }
-
-    std::string adep = FlightPlan.GetFlightPlanData().GetOrigin();
-    to_upper(adep);
-
-    if (adep.compare("LPPT") == 0) {
-
-        CheckEtd(FlightPlan);
-
-    }
-
-
-}*/
