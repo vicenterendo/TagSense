@@ -5,13 +5,13 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cctype>
 
 #define MY_PLUGIN_NAME      "TagSense"
 #define MY_PLUGIN_VERSION   "0.0.1-a"
 #define MY_PLUGIN_DEVELOPER "Vicente Rendo"
 #define MY_PLUGIN_COPYRIGHT "GPL v3"
-#define SERVER_HOSTNAME "127.0.0.1"
-#define SERVER_PORT ""
+#define CONFIG_FILE "TagSenseConfig.txt"
 
 using namespace std;
 using namespace EuroScopePlugIn;
@@ -27,6 +27,102 @@ const   int     TAG_FUNC_HOLDING_EDITOR = 10;  // when editing the point name
 const   int     TAG_FUNC_HOLDING_WAIT_LIST = 11;  // for the popup list elements
 const   int     TAG_FUNC_HOLDING_WAIT_CLEAR = 12;  // cnacel the wait by the popup
 
+bool STATE = true;
+string SERVER_ADDR = "127.0.0.1";
+string ORIGIN_PREFIX = "";
+int REFRESH_FREQ = 10;
+
+static bool startsWith(const char* pre, const char* str) {
+    const size_t lenpre = strlen(pre), lenstr = strlen(str);
+    return lenstr < lenpre ? false : strncmp(pre, str, lenpre) == 0;
+}
+
+static std::string toUpper(const std::string& input) {
+    std::string upperCase;
+
+    for (char c : input) {
+        upperCase += std::toupper(c);
+    }
+
+    return upperCase;
+}
+
+static std::vector<std::string> splitString(const std::string& input, char delimiter) {
+    std::vector<std::string> result;
+    std::string token;
+    std::istringstream iss(input);
+
+    while (std::getline(iss, token, delimiter)) {
+        result.push_back(token);
+    }
+
+    return result;
+}
+
+void CTagSensePlugIn::loadConfig() {
+    std::ifstream inputFile(CONFIG_FILE);
+    if (!inputFile) {
+        std::ofstream outputFile(CONFIG_FILE);
+        if (outputFile) {
+            outputFile << format("SERVER {}\nPREFIX {}", SERVER_ADDR, ORIGIN_PREFIX) << std::endl;
+            outputFile.close();
+        }
+    }
+    try {
+        fstream configFile;
+        configFile.open(CONFIG_FILE, ios::in);
+        if (configFile.is_open()) {
+            string tp;
+            while (getline(configFile, tp)) {
+                try {
+                    const vector<string> split = splitString(tp, ' ');
+                    const string param = toUpper(split.at(0));
+                    string* value = nullptr;
+                    try {
+                        value = new string(split.at(1));
+                    } catch (exception e) {
+                    }
+                    if (param == "SERVER") {
+                        if (value != nullptr) {
+                            SERVER_ADDR = string(value->c_str());
+                        }
+                        else {
+                            SERVER_ADDR = string("127.0.0.1");
+                        }
+                    }
+                    else if (param == "PREFIX") {
+                        if (value != nullptr) {
+                            ORIGIN_PREFIX = string(value->c_str());
+                        }
+                        else {
+                            ORIGIN_PREFIX = string("");
+                        }
+                    }
+                    else if (param == "REFRESH") {
+                        if (value != nullptr) {
+                            try {
+                                REFRESH_FREQ = stoi(string(value->c_str()));
+                            }
+                            catch (exception e) {
+                                REFRESH_FREQ = 10;
+                            }
+                        }
+                        else {
+                            REFRESH_FREQ = 10;
+                        }
+                    }
+                } catch (const exception e) {
+                }
+                
+            }
+            configFile.close();
+        }
+        sendMessage("Config file loaded.");
+    }
+    catch (const std::exception e) {
+        sendMessage("Failed to load config file.");
+    }
+}
 
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
     const size_t total_size = size * nmemb;
@@ -35,16 +131,14 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
     return total_size;
 }
 
-//---CHoldingListPlugIn------------------------------------------------
-
 CTagSensePlugIn::CTagSensePlugIn()
-    : EuroScopePlugIn::CPlugIn(EuroScopePlugIn::COMPATIBILITY_CODE,
+  : EuroScopePlugIn::CPlugIn(EuroScopePlugIn::COMPATIBILITY_CODE,
         MY_PLUGIN_NAME,
         MY_PLUGIN_VERSION,
         MY_PLUGIN_DEVELOPER,
         MY_PLUGIN_COPYRIGHT)
 {
-    sendMessage("P0");
+    loadConfig();
 }
 
 void CTagSensePlugIn::sendMessage(string message) {
@@ -52,37 +146,7 @@ void CTagSensePlugIn::sendMessage(string message) {
 };
 
 void CTagSensePlugIn::OnTimer(int Counter) {
-    if (Counter % 10 == 0) multithread(&CTagSensePlugIn::IterateFPs);
-}
-
-void CTagSensePlugIn::OnGetTagItem(
-    CFlightPlan FlightPlan,
-    CRadarTarget RadarTarget,
-    int ItemCode,
-    int TagData,
-    char sItemString[16],
-    int* pColorCode,
-    COLORREF* pRGB,
-    double* pFontSize)
-{
-    //CPlugIn::DisplayUserMessage(PLUGIN_NAME, "", "TRIGGER", true, true, true, false, false);
-    //sendFP(FlightPlan);
-}
-
-void CTagSensePlugIn::OnFlightPlanFlightPlanDataUpdate(CFlightPlan FlightPlan) {
-    //sendFP(FlightPlan);
-}
-
-//---~CHoldingListPlugIn-----------------------------------------------
-
-void CTagSensePlugIn::OnRefresh(HDC hDC, int Phase) {
-    const CFlightPlan fp = FlightPlanSelectASEL();
-    if (fp.IsValid()) {
-        CPlugIn::DisplayUserMessage(PLUGIN_NAME, "", "VALID2", true, true, true, false, false);
-        SendFP(fp);
-        return;
-    }
-    CPlugIn::DisplayUserMessage(PLUGIN_NAME, "", "INVALID2", true, true, true, false, false);
+    if (Counter % REFRESH_FREQ == 0 && STATE) multithread(&CTagSensePlugIn::IterateFPs);
 }
 
 void CTagSensePlugIn::multithread(void (CTagSensePlugIn::* f)()) {
@@ -103,7 +167,7 @@ void CTagSensePlugIn::IterateFPs()
     std::vector<CFlightPlan> FPs;
     while (true) {
         if (!fp.IsValid()) break;
-        if (string(fp.GetFlightPlanData().GetOrigin()).substr(0, 2) == "LP") FPs.push_back(fp);
+        if (string(fp.GetFlightPlanData().GetOrigin()).substr(0, ORIGIN_PREFIX.length()) == ORIGIN_PREFIX) FPs.push_back(fp);
         fp = FlightPlanSelectNext(fp);
         if (fp.GetCallsign() == firstCallsign) break;
     }
@@ -166,7 +230,7 @@ void CTagSensePlugIn::SendFPs(vector<CFlightPlan> fps_total) {
             try {
                 struct curl_slist* headers = nullptr;
                 headers = curl_slist_append(headers, "Content-Type: application/json");
-                curl_easy_setopt(curl, CURLOPT_URL, std::format("http://{}{}/tag", SERVER_HOSTNAME, SERVER_PORT).c_str());
+                curl_easy_setopt(curl, CURLOPT_URL, std::format("http://{}/tag", SERVER_ADDR).c_str());
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback, json);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
                 curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
@@ -185,6 +249,29 @@ void CTagSensePlugIn::SendFPs(vector<CFlightPlan> fps_total) {
 
     }
 }
+
+bool CTagSensePlugIn::OnCompileCommand(const char* sCommandLine) {
+    if (startsWith(".tagsense stop", sCommandLine)) {
+        STATE = false;
+        sendMessage("UPDATES - OFF");
+        return true;
+    }
+    else if (startsWith(".tagsense start", sCommandLine)) {
+        STATE = true;
+        sendMessage("UPDATES - ON");
+        return true;
+    }
+    else if (startsWith(".tagsense server", sCommandLine) && splitString(string(sCommandLine), ' ').size() == 3) {
+        SERVER_ADDR = splitString(string(sCommandLine), ' ').at(2);
+        sendMessage(format("SERVER ADDRESS - {}", SERVER_ADDR));
+        return true;
+    }
+    else if (startsWith(".tagsense reload", sCommandLine)) {
+        loadConfig();
+        return true;
+    }
+}
+
 
 CTagSensePlugIn :: ~CTagSensePlugIn(void)
 {

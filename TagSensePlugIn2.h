@@ -51,15 +51,6 @@ public:
 
     void OnTimer(int Counter);
 
-    void OnGetTagItem (CFlightPlan FlightPlan,
-        CRadarTarget RadarTarget,
-        int ItemCode,
-        int TagData,
-        char sItemString[16],
-        int* pColorCode,
-        COLORREF* pRGB,
-        double* pFontSize);
-
     //void OnFunctionCall(int FunctionId, const char* ItemString, POINT Pt, RECT Area);
     void multithread(void (CTagSensePlugIn::* f)());
 
@@ -102,34 +93,7 @@ public:
 
     void SendFPs(vector<CFlightPlan> fps_total);
 
-    void OnFlightPlanFlightPlanDataUpdate(CFlightPlan FlightPlan);
+    bool OnCompileCommand(const char* sCommandLine);
 
-    void OnRefresh(HDC hDC, int Phase);
+    void loadConfig();
 };
-
-
-/*void ACDMPlugin::OnGetTagItem(EuroScopePlugIn::CFlightPlan FlightPlan,
-    EuroScopePlugIn::CRadarTarget RadarTarget,
-    int ItemCode,
-    int TagData,
-    char sItemString[16],
-    int* pColorCode,
-    COLORREF* pRGB,
-    double* pFontSize)
-{
-
-    if (!FlightPlan.IsValid()) {
-        return;
-    }
-
-    std::string adep = FlightPlan.GetFlightPlanData().GetOrigin();
-    to_upper(adep);
-
-    if (adep.compare("LPPT") == 0) {
-
-        CheckEtd(FlightPlan);
-
-    }
-
-
-}*/
