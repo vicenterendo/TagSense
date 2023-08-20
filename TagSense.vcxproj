@@ -370,8 +370,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
-    <None Include="TagSensePlugin.def" />
     <None Include="packages.config" />
+    <None Include="TagSensePlugin.def" />
     <None Include="res\TagSensePlugin.rc2" />
   </ItemGroup>
   <ItemGroup>
