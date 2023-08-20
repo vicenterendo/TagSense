@@ -30,6 +30,7 @@ const   int     TAG_FUNC_HOLDING_WAIT_CLEAR = 12;  // cnacel the wait by the pop
 bool STATE = true;
 string SERVER_ADDR = "127.0.0.1";
 string ORIGIN_PREFIX = "";
+int REFRESH_FREQ = 10;
 
 static bool startsWith(const char* pre, const char* str) {
     const size_t lenpre = strlen(pre), lenstr = strlen(str);
@@ -97,7 +98,18 @@ void CTagSensePlugIn::loadConfig() {
                             ORIGIN_PREFIX = string("");
                         }
                     }
-                    else {
+                    else if (param == "REFRESH") {
+                        if (value != nullptr) {
+                            try {
+                                REFRESH_FREQ = stoi(string(value->c_str()));
+                            }
+                            catch (exception e) {
+                                REFRESH_FREQ = 10;
+                            }
+                        }
+                        else {
+                            REFRESH_FREQ = 10;
+                        }
                     }
                 } catch (const exception e) {
                 }
@@ -134,7 +146,7 @@ void CTagSensePlugIn::sendMessage(string message) {
 };
 
 void CTagSensePlugIn::OnTimer(int Counter) {
-    if (Counter % 10 == 0 && STATE) multithread(&CTagSensePlugIn::IterateFPs);
+    if (Counter % REFRESH_FREQ == 0 && STATE) multithread(&CTagSensePlugIn::IterateFPs);
 }
 
 void CTagSensePlugIn::multithread(void (CTagSensePlugIn::* f)()) {
