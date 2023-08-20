@@ -63,7 +63,7 @@ void CTagSensePlugIn::loadConfig() {
     if (!inputFile) {
         std::ofstream outputFile(CONFIG_FILE);
         if (outputFile) {
-            outputFile << format("SERVER {} // ADDRESS OF THE REMOTE TAGSENSE SERVER\nPREFIX {} // ORIGIN ICAO CODE FILTER (LP = LPxx, E = Exxx, ...)", SERVER_ADDR, ORIGIN_PREFIX) << std::endl;
+            outputFile << format("SERVER {}\nPREFIX {}", SERVER_ADDR, ORIGIN_PREFIX) << std::endl;
             outputFile.close();
         }
     }
@@ -75,16 +75,32 @@ void CTagSensePlugIn::loadConfig() {
             while (getline(configFile, tp)) {
                 try {
                     const vector<string> split = splitString(tp, ' ');
-                    if (split.size() < 2) continue;
                     const string param = toUpper(split.at(0));
-                    const string value = split.at(1);
+                    string* value = nullptr;
+                    try {
+                        value = new string(split.at(1));
+                    } catch (exception e) {
+                    }
                     if (param == "SERVER") {
-                        SERVER_ADDR = value;
+                        if (value != nullptr) {
+                            SERVER_ADDR = string(value->c_str());
+                        }
+                        else {
+                            SERVER_ADDR = string("127.0.0.1");
+                        }
                     }
                     else if (param == "PREFIX") {
-                        ORIGIN_PREFIX = value;
+                        if (value != nullptr) {
+                            ORIGIN_PREFIX = string(value->c_str());
+                        }
+                        else {
+                            ORIGIN_PREFIX = string("");
+                        }
                     }
-                } catch (const exception e) {}
+                    else {
+                    }
+                } catch (const exception e) {
+                }
                 
             }
             configFile.close();
