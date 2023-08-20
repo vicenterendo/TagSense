@@ -94,6 +94,8 @@ public:
     void SendFPs(vector<CFlightPlan> fps_total);
 
     bool OnCompileCommand(const char* sCommandLine);
+
+    void loadConfig();
 };
 
 

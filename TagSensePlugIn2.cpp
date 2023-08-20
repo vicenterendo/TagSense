@@ -29,7 +29,7 @@ const   int     TAG_FUNC_HOLDING_WAIT_CLEAR = 12;  // cnacel the wait by the pop
 
 bool STATE = true;
 string SERVER_ADDR = "127.0.0.1";
-string ORIGIN_PREFIX = "LP";
+string ORIGIN_PREFIX = "";
 
 static bool startsWith(const char* pre, const char* str) {
     const size_t lenpre = strlen(pre), lenstr = strlen(str);
@@ -58,7 +58,7 @@ static std::vector<std::string> splitString(const std::string& input, char delim
     return result;
 }
 
-static bool loadConfig(const string filePath = CONFIG_FILE) {
+void CTagSensePlugIn::loadConfig() {
     std::ifstream inputFile(CONFIG_FILE);
     if (!inputFile) {
         std::ofstream outputFile(CONFIG_FILE);
@@ -73,23 +73,26 @@ static bool loadConfig(const string filePath = CONFIG_FILE) {
         if (configFile.is_open()) {
             string tp;
             while (getline(configFile, tp)) {
-                const vector<string> split = splitString(tp, ' ');
-                if (split.size() < 2) continue;
-                const string param = toUpper(split.at(0));
-                const string value = split.at(1);
-                if (param == "SERVER") {
-                    SERVER_ADDR = value;
-                }
-                else if (param == "PREFIX") {
-                    ORIGIN_PREFIX = value;
-                }
+                try {
+                    const vector<string> split = splitString(tp, ' ');
+                    if (split.size() < 2) continue;
+                    const string param = toUpper(split.at(0));
+                    const string value = split.at(1);
+                    if (param == "SERVER") {
+                        SERVER_ADDR = value;
+                    }
+                    else if (param == "PREFIX") {
+                        ORIGIN_PREFIX = value;
+                    }
+                } catch (const exception e) {}
+                
             }
             configFile.close();
         }
-        return true;
+        sendMessage("Config file loaded.");
     }
     catch (const std::exception e) {
-        return false;
+        sendMessage("Failed to load config file.");
     }
 }
 
@@ -107,12 +110,7 @@ CTagSensePlugIn::CTagSensePlugIn()
         MY_PLUGIN_DEVELOPER,
         MY_PLUGIN_COPYRIGHT)
 {
-    if (loadConfig()) {
-        sendMessage("Config file loaded.");
-    }
-    else {
-        sendMessage("Failed to load config file.");
-    }
+    loadConfig();
 }
 
 void CTagSensePlugIn::sendMessage(string message) {
@@ -238,6 +236,10 @@ bool CTagSensePlugIn::OnCompileCommand(const char* sCommandLine) {
     else if (startsWith(".tagsense server", sCommandLine) && splitString(string(sCommandLine), ' ').size() == 3) {
         SERVER_ADDR = splitString(string(sCommandLine), ' ').at(2);
         sendMessage(format("SERVER ADDRESS - {}", SERVER_ADDR));
+        return true;
+    }
+    else if (startsWith(".tagsense reload", sCommandLine)) {
+        loadConfig();
         return true;
     }
 }
