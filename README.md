@@ -22,6 +22,19 @@ The configuration file allows the user to customize the plugin's behavior to the
 - `PREFIX` Start of the icao codes of the flights to be uploaded <sub>( LP = LPxx | E = Exxx )</sub>
 
 ---
+
+## 💻 Commands
+Commands are a way to **temporarily** change the plugin's behavior. These changes are reset everytime the plugin is reloaded. All commands start with
+<pre>.tagsense (...) </pre>
+- `stop` Stop sending updates to the server.
+  
+- `start` Start sending updates to the server.
+  
+- `server <addr>` Set the server address.
+  
+- `reload` Reload the settings from the config file.
+
+---
 ## Alpha Phase
 The TagSense plugin is currently in the alpha phase, meaning there is a chance that Euroscope ( being Euroscope ) will completely wet it's pants. It is currently being tested at Portugal vACC. If you would like to take part in the tests, please join the [Portugal vACC Discord Server](https://discord.portugal-vacc.org) for instructions.
 
