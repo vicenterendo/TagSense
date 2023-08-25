@@ -216,10 +216,10 @@ void CTagSensePlugIn::SendFPs(vector<CFlightPlan> fps_total) {
             _json = _json + "\"sid\":\"" + SID + "\",";
             _json = _json + "\"star\":\"" + STAR + "\",";
             _json = _json + "\"status\":\"" + status + "\",";
-            _json = _json + "\"distance_to_origin\":\"" + to_string(distance_to_origin) + "\",";
-            _json = _json + "\"distance_to_destination\":\"" + to_string(distance_to_destination) + "\",";
-            _json = _json + "\"flight_level\":\"" + to_string(flight_level) + "\",";
-            _json = _json + "\"pressure_altitude\":\"" + to_string(pressure_altitude) + "\"";
+            _json = _json + "\"distance_to_origin\":" + to_string(distance_to_origin) + ",";
+            _json = _json + "\"distance_to_destination\":" + to_string(distance_to_destination) + ",";
+            _json = _json + "\"flight_level\":" + to_string(flight_level) + ",";
+            _json = _json + "\"pressure_altitude\":" + to_string(pressure_altitude) + "";
             json += _json + "},";
         }
 
