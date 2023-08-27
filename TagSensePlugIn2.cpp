@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <cctype>
+#include <regex>
 
 #define MY_PLUGIN_NAME      "TagSense"
 #define MY_PLUGIN_VERSION   "0.0.1-a"
@@ -177,6 +178,7 @@ void CTagSensePlugIn::IterateFPs()
 void CTagSensePlugIn::SendFPs(vector<CFlightPlan> fps_total) {
     const std::vector<std::vector<CFlightPlan>> fps_subs = SplitVector(fps_total, 100);
     const int fps_subs_size = fps_subs.size();
+    regex stand_regex("s\/[a-zA-Z0-9]*\/s");
     for (int i = 0; i < fps_subs_size; i++) {
         std::vector<CFlightPlan> fps = fps_subs.at(i);
         CURL* curl;
@@ -202,6 +204,11 @@ void CTagSensePlugIn::SendFPs(vector<CFlightPlan> fps_total) {
             const char* STAR = data.GetStarName();
             const int pressure_altitude = radar_target.GetPosition().GetPressureAltitude();
             const int flight_level = radar_target.GetPosition().GetFlightLevel();
+            string stand = string(assigned_data.GetFlightStripAnnotation(6));
+            regex stand_start_regex("s\/");
+            regex stand_end_regex("\/s");
+            stand = regex_replace(stand, stand_start_regex, string(""));
+            stand = regex_replace(stand, stand_end_regex, string(""));
             string _json = "{";
             _json = _json + "\"callsign\":\"" + callsign + "\",";
             if (strlen(TSAT_TAG) > 4) {
@@ -219,7 +226,8 @@ void CTagSensePlugIn::SendFPs(vector<CFlightPlan> fps_total) {
             _json = _json + "\"distance_to_origin\":" + to_string(distance_to_origin) + ",";
             _json = _json + "\"distance_to_destination\":" + to_string(distance_to_destination) + ",";
             _json = _json + "\"flight_level\":" + to_string(flight_level) + ",";
-            _json = _json + "\"pressure_altitude\":" + to_string(pressure_altitude) + "";
+            _json = _json + "\"pressure_altitude\":" + to_string(pressure_altitude) + ",";
+            _json = _json + "\"stand\":\"" + stand + "\"";
             json += _json + "},";
         }
 
