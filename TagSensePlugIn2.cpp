@@ -230,7 +230,7 @@ void CTagSensePlugIn::SendFPs(vector<CFlightPlan> fps_total) {
             try {
                 struct curl_slist* headers = nullptr;
                 headers = curl_slist_append(headers, "Content-Type: application/json");
-                curl_easy_setopt(curl, CURLOPT_URL, std::format("http://{}/tag", SERVER_ADDR).c_str());
+                curl_easy_setopt(curl, CURLOPT_URL, std::format("http://{}/v0/flight", SERVER_ADDR).c_str());
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback, json);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
                 curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
