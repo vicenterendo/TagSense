@@ -19,7 +19,7 @@ The configuration file allows the user to customize the plugin's behavior to the
 
 - `SERVER` Address of the server 
 
-- `PREFIX` Start of the icao codes of the flights to be uploaded <sub>( LP = LPxx | E = Exxx )</sub>
+- `PREFIX` Only flights whose origin or destination's icao code starts with this value will be uploaded. <sub>( LP = LPxx | E = Exxx )</sub>
 
 ---
 

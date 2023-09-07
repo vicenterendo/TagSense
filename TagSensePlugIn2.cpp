@@ -30,7 +30,7 @@ const   int     TAG_FUNC_HOLDING_WAIT_CLEAR = 12;  // cnacel the wait by the pop
 
 bool STATE = true;
 string SERVER_ADDR = "127.0.0.1";
-string ORIGIN_PREFIX = "";
+string AIRPORT_PREFIX = "";
 int REFRESH_FREQ = 10;
 
 static bool startsWith(const char* pre, const char* str) {
@@ -65,7 +65,7 @@ void CTagSensePlugIn::loadConfig() {
     if (!inputFile) {
         std::ofstream outputFile(CONFIG_FILE);
         if (outputFile) {
-            outputFile << format("SERVER {}\nPREFIX {}", SERVER_ADDR, ORIGIN_PREFIX) << std::endl;
+            outputFile << format("SERVER {}\nPREFIX {}", SERVER_ADDR, AIRPORT_PREFIX) << std::endl;
             outputFile.close();
         }
     }
@@ -93,10 +93,10 @@ void CTagSensePlugIn::loadConfig() {
                     }
                     else if (param == "PREFIX") {
                         if (value != nullptr) {
-                            ORIGIN_PREFIX = string(value->c_str());
+                            AIRPORT_PREFIX = string(value->c_str());
                         }
                         else {
-                            ORIGIN_PREFIX = string("");
+                            AIRPORT_PREFIX = string("");
                         }
                     }
                     else if (param == "REFRESH") {
@@ -168,7 +168,13 @@ void CTagSensePlugIn::IterateFPs()
     std::vector<CFlightPlan> FPs;
     while (true) {
         if (!fp.IsValid()) break;
-        if (string(fp.GetFlightPlanData().GetOrigin()).substr(0, ORIGIN_PREFIX.length()) == ORIGIN_PREFIX) FPs.push_back(fp);
+        if (
+            (string(fp.GetFlightPlanData().GetOrigin()).substr(0, AIRPORT_PREFIX.length()) == AIRPORT_PREFIX) || 
+            (string(fp.GetFlightPlanData().GetDestination()).substr(0, AIRPORT_PREFIX.length()) == AIRPORT_PREFIX)
+        ) 
+        {
+            FPs.push_back(fp);
+        }
         fp = FlightPlanSelectNext(fp);
         if (fp.GetCallsign() == firstCallsign) break;
     }
