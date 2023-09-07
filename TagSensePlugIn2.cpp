@@ -29,7 +29,7 @@ const   int     TAG_FUNC_HOLDING_WAIT_LIST = 11;  // for the popup list elements
 const   int     TAG_FUNC_HOLDING_WAIT_CLEAR = 12;  // cnacel the wait by the popup
 
 bool STATE = true;
-string SERVER_ADDR = "127.0.0.1";
+string ENDPOINT_URL = "127.0.0.1";
 string AIRPORT_PREFIX = "";
 int REFRESH_FREQ = 10;
 
@@ -65,7 +65,7 @@ void CTagSensePlugIn::loadConfig() {
     if (!inputFile) {
         std::ofstream outputFile(CONFIG_FILE);
         if (outputFile) {
-            outputFile << format("SERVER {}\nPREFIX {}", SERVER_ADDR, AIRPORT_PREFIX) << std::endl;
+            outputFile << format("SERVER {}\nPREFIX {}", ENDPOINT_URL, AIRPORT_PREFIX) << std::endl;
             outputFile.close();
         }
     }
@@ -83,12 +83,12 @@ void CTagSensePlugIn::loadConfig() {
                         value = new string(split.at(1));
                     } catch (exception e) {
                     }
-                    if (param == "SERVER") {
+                    if (param == "SERVER" || param == "ENDPOINT") {
                         if (value != nullptr) {
-                            SERVER_ADDR = string(value->c_str());
+                            ENDPOINT_URL = string(value->c_str());
                         }
                         else {
-                            SERVER_ADDR = string("127.0.0.1");
+                            ENDPOINT_URL = string("127.0.0.1");
                         }
                     }
                     else if (param == "PREFIX") {
@@ -244,7 +244,7 @@ void CTagSensePlugIn::SendFPs(vector<CFlightPlan> fps_total) {
             try {
                 struct curl_slist* headers = nullptr;
                 headers = curl_slist_append(headers, "Content-Type: application/json");
-                curl_easy_setopt(curl, CURLOPT_URL, std::format("{}/v0/flight", SERVER_ADDR).c_str());
+                curl_easy_setopt(curl, CURLOPT_URL, ENDPOINT_URL.c_str());
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback, json);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
                 curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
@@ -275,8 +275,8 @@ bool CTagSensePlugIn::OnCompileCommand(const char* sCommandLine) {
         return true;
     }
     else if (startsWith(".tagsense server", sCommandLine) && splitString(string(sCommandLine), ' ').size() == 3) {
-        SERVER_ADDR = splitString(string(sCommandLine), ' ').at(2);
-        sendMessage(format("SERVER ADDRESS - {}", SERVER_ADDR));
+        ENDPOINT_URL = splitString(string(sCommandLine), ' ').at(2);
+        sendMessage(format("SERVER ADDRESS - {}", ENDPOINT_URL));
         return true;
     }
     else if (startsWith(".tagsense reload", sCommandLine)) {
