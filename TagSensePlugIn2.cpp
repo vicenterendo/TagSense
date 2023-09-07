@@ -244,14 +244,13 @@ void CTagSensePlugIn::SendFPs(vector<CFlightPlan> fps_total) {
             try {
                 struct curl_slist* headers = nullptr;
                 headers = curl_slist_append(headers, "Content-Type: application/json");
-                curl_easy_setopt(curl, CURLOPT_URL, std::format("http://{}/v0/flight", SERVER_ADDR).c_str());
+                curl_easy_setopt(curl, CURLOPT_URL, std::format("{}/v0/flight", SERVER_ADDR).c_str());
                 curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback, json);
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
                 curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
                 curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, json.length());
                 curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-                //curl_easy_setopt(c, CURLOPT_CAINFO, "/path/to/the/certificate.crt");
-                //curl_easy_setopt(c, CURLOPT_SSL_VERIFYPEER, 1);
+                curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
                 res = curl_easy_perform(curl);
                 curl_easy_cleanup(curl);
 

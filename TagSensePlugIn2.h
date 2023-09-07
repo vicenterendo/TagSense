@@ -54,40 +54,7 @@ public:
     //void OnFunctionCall(int FunctionId, const char* ItemString, POINT Pt, RECT Area);
     void multithread(void (CTagSensePlugIn::* f)());
 
-    void SendFP(CFlightPlan FlightPlan) {
-        CURL* curl;
-        curl = curl_easy_init();
-        CURLcode res;
-        std::string readBuffer;
-        const CFlightPlanControllerAssignedData assigned_data = FlightPlan.GetControllerAssignedData();
-        const CFlightPlanData data = FlightPlan.GetFlightPlanData();
-        const char* TSAT_TAG = assigned_data.GetFlightStripAnnotation(3);
-        const char* callsign = FlightPlan.GetCallsign();
-        const char* destination = data.GetDestination();
-        const char* SID = data.GetSidName();
-        const char* squawk = assigned_data.GetSquawk();
-        const char* status = FlightPlan.GetGroundState();
-        const char* STAR = data.GetStarName();
-        string info = "";
-        info = info + "?callsign=" + callsign;
-        if (strlen(TSAT_TAG) > 4) {
-            string TSAT(TSAT_TAG);
-            TSAT = TSAT.substr(2, 4);
-            info = info + "&tsat=" + TSAT;
-        }
-        info = info + "&destination=" + destination;
-        info = info + "&squawk=" + squawk;
-        info = info + "&sid=" + SID;
-        info = info + "&star=" + STAR;
-        info = info + "&status=" + status;
-        if (curl) {
-            curl_easy_setopt(curl, CURLOPT_URL, ("http://localhost:8080/" + info).c_str());
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-            res = curl_easy_perform(curl);
-            curl_easy_cleanup(curl);
-        }
-    }
+    void SendFP(CFlightPlan FlightPlan);
 
     void IterateFPs();
 
